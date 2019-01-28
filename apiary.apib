@@ -1,0 +1,906 @@
+FORMAT: 1A
+HOST: https://api.redjepakketje.nl/api/v1
+
+# Redjepakketje
+
+With this API you can create shipments within your Redjepakketje account. It is a RESTful JSON API with HTTP Basic Auth.
+
+
+## Endpoint
+
+API is available on https://api.redjepakketje.nl/api/v1
+
+> Note: At least TLS 1.2 is required to connect to the API.
+
+## Authentication
+
+We use HTTP Basic Auth for authentication. Use your API key as username and leave the password blank. (Password will be ignored.)
+
+You can get an API key from the Redjepakketje service desk.
+
+
+## Rate limit
+
+Basic rate limit is in place. Responses will have a **X-RateLimit-Limit** header, showing the number of requests left in this time frame. When you hit the rate limit, we will give a **429 Too Many Requests** status.
+
+Rate limits can change, but at this moment the limit is 60 requests per 1 minute.
+
+# Group Endpoints
+
+## Shipments [/shipments]
+
+######The possible Shipment status values are:
+
+ - pre_transit
+ - ready_for_pickup
+ - in_transit
+ - in_depot
+ - out_for_delivery
+ - delivered
+ - failed_to_deliver
+ - return_to_sender
+ - returned_to_sender_out_for_delivery
+ - returned_to_sender
+ - cancelled
+ - not_available
+ 
+> Note: Additional status values can be added in the future.
+
+######Currently supported columns to sort on:
+ - trackingcode
+ - city
+ - reference
+ - name
+ - expected_delivery_date
+ - status
+ 
+ By default the api is sorted on datetime created (descending).
+ 
+######The possible Shipment delivery attempt status values are:
+|Value|Successfull|Meaning|
+|---|---|---|
+|OK|true|Delivered normal|
+|BB|true|Delivered at neighbours|
+|NT1|false|Not at home, neither are neighbours|
+|NT2|false|Not at home, neighbours didn't accept shipment|
+|BDG|false|Company closed on delivery|
+|NDA|false|Recepient is too young (<18)|
+|FTA|false|Address invalid|
+|NA|false|Shipment not available|
+|ND|false|Not delivered, see note|
+|SF|false|Sorting mistake|
+|TN|false|Time shortage|
+|LST|false|Shipment is lost|
+
+ 
+######Current possible shipment products:
+ - sameday_parcel_standard
+ - sameday_parcel_medium
+ - sameday_parcel_large
+ - sameday_mailbox
+ 
+######Current possible shipment options:
+|Option|Default|Extra|
+|---|---|---|
+|perishable|false|max_attempts: 2|
+|require_signature|false|   |
+|age_check_18|false|   |
+|allow_neighbours|true|   |
+
+**Note:** max_attempts should be between 1 and 3. Default is 2.
+
+**Note:** A shipment with product sameday_mailbox cannot have any shipment options.
+
+**Note:** Events and Delivery Attempts are sorted by date created (descending).
+ 
+### List shipments [GET /shipments?per_page={per_page}&sort={column}|{direction}&page={page}&search={search}&before={before}&after={after}]
+
+Get a paginated list of shipments.
+
+**Tip:** If you need real-time updates of tracking statusses, please consider using Webhooks instead.
+
+> Note: If no filter is given (`search`, `before`, `after` or `per_page`) only the last 7 days of shipments will be returned.
+
++ Parameters
+    + per_page (int) - Number of shipments returned per page (max. 1000)
+    + column (string, optional) - Name of the column to sort on.
+    + direction (string, optional) - Direction to sort in. (`asc` or `desc`)
+    + page (int, optional) - Page number to return data for.
+    + search (string, optional) - Search query, columns searched on: `name`, `trackingcode`, `city` and `reference`)
+    + before (string, optional) - Only get shipments with an expected delivery date before or equal to this date
+    + after (string, optional) - Only get shipments with an expected delivery date equal or after this date
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+
++ Response 200 (application/json)
+
+        {
+            "total": 77,
+            "per_page": 15,
+            "current_page": 2,
+            "last_page": 6,
+            "next_page_url": "...",
+            "prev_page_url": "...",
+            "from": 16,
+            "to": 30,
+            "data": [
+                {
+                    "trackingcode": "RETT8XSN4",
+                    "sender_name": "Coolblue",
+                    "company_name": null,
+                    "name": "Dirk de Vries",
+                    "street": "Dorpsstraat",
+                    "house_number": "12",
+                    "house_number_extension": null,
+                    "zipcode": "8231AM",
+                    "city": "Arnhem",
+                    "telephone": "0699283902",
+                    "email": "noreply@redjepakketje.nl",
+                    "reference": null,
+                    "note": null,
+                    "tracking_url": "https://portal.redjepakketje.nl/t/RETT8XSN4",
+                    "label_pdf_url": "https://api.redjepakketje.nl/api/v1/shipments/RETT8XSN4/label.pdf",
+                    "label_png_url": "https://api.redjepakketje.nl/api/v1/shipments/RETT8XSN4/label?format=png",
+                    "label_zpl_url": "https://api.redjepakketje.nl/api/v1/shipments/RETT8XSN4/label?format=zpl",
+                    "status": "pre_transit",
+                    "expected_delivery_date": "2016-02-22",
+                    "expected_delivery_time_from": null,
+                    "expected_delivery_time_to": null,
+                    "pick_up_point": [],
+                    "product": "sameday_parcel_standard",
+                    "product_options": [],
+                    "delivery_attempts": [],
+                    "events": []
+                },
+                {
+                    "trackingcode": "RJG2CJSGN",
+                    "sender_name": "Coolblue",
+                    "company_name": "Boeren BV",
+                    "name": "Gijs Boersma",
+                    "street": "Lange laan",
+                    "house_number": "29",
+                    "house_number_extension": "a",
+                    "zipcode": "9281EM",
+                    "city": "Zevenaar",
+                    "telephone": "0602938172",
+                    "email": "noreply@example.com",
+                    "reference": "Bestelling 112",
+                    "note": "Achter de bosjes leggen",
+                    "tracking_url": "https://portal.redjepakketje.nl/t/RJG2CJSGN",
+                    "label_pdf_url": "https://api.redjepakketje.nl/api/v1/shipments/RJG2CJSGN/label.pdf",
+                    "label_png_url": "https://api.redjepakketje.nl/api/v1/shipments/RJG2CJSGN/label?format=png",
+                    "label_zpl_url": "https://api.redjepakketje.nl/api/v1/shipments/RJG2CJSGN/label?format=zpl",
+                    "status": "delivered",
+                    "expected_delivery_date": "2016-02-22",
+                    "expected_delivery_time_from": "15:00",
+                    "expected_delivery_time_to": "15:30",
+                    "pick_up_point": {
+                        "uuid": "560db083-d941-425b-b3b6-b813718297e1",
+                        "reference": "04925725f0ce61c9",
+                        "name": "Chocoladebruin animi",
+                        "telephone": "+3126 2284479",
+                        "street": "Zhanglaan",
+                        "house_number": "2",
+                        "zipcode": "8722 JR",
+                        "city": "Asten",
+                        "state": null,
+                        "country": "NL",
+                        "available_days": [
+                            2,
+                            6,
+                            7,
+                            4,
+                            3,
+                            5,
+                            1
+                        ],
+                        "cut_off_time": "14:00:00",
+                        "contact": {
+                            "uuid": "0504a55f-4b14-49ac-a0e8-44e3c500ea30",
+                            "reference": "zlCWtf9vtmnlgGUf",
+                            "first_name": "Jente",
+                            "last_name": "van Dijk",
+                            "gender": null,
+                            "telephone": "042 1855709",
+                            "email": "jente@example.com"
+                        }
+                    },
+                    "product": "sameday_parcel_medium",
+                    "product_options": [
+                        {
+                            "option": "allow_neighbours",
+                            "value": false
+                        }
+                    ],
+                    "delivery_attempts": [
+                        {
+                            "datetime": "2017-12-01T11:17:39+01:00",
+                            "receiver_address": "Langelaan 31",
+                            "receiver_signature": "https://api.redjepakketje.nl/api/v1/shipments/RJG2CJSGN/delivery-attempt/171/signature.png",
+                            "successful": true,
+                            "status_text": "Afgeleverd bij buren",
+                            "status": "BB"
+                        },
+                        {
+                            "datetime": "2017-11-22T08:39:09+01:00",
+                            "receiver_address": null,
+                            "receiver_signature": null,
+                            "successful": false,
+                            "status_text": "Niemand aanwezig",
+                            "status": "NT1"
+                        }
+                    ],
+                    "events": [
+                        {
+                            "old_status": "out_for_delivery",
+                            "new_status": "delivered",
+                            "datetime": "2017-11-22T09:27:01+01:00"
+                        },
+                        {
+                            "old_status": "pre_transit",
+                            "new_status": "out_for_delivery",
+                            "datetime": "2017-11-22T08:38:02+01:00"
+                        }
+                    ]
+                }
+            ]
+        }
+
+
+### Create a new shipment [POST]
+
+After a shipment is created, it will be created as a 'pre\_transit' shipment. It will move to 'in\_transit' as soon as the shipment is in our possession.
+
+Trackingpage and label are directly available after shipment creation.
+
+The expected date of delivery is based on the cut off time for the given pick up point.
+
+Only product options that differ from the defaults are returned.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+
+    + Attributes (object)
+        + company_name: Boeren BV (string)
+        + name: Gijs Boersma (string, required)
+        + street: Lange laan (string, required)
+        + house_number: 29 (number, required)
+        + house\_number\_extension: a (string) - Can also contain something like "Second floor"
+        + zipcode: 9281EM (string, required)
+        + city: Zevenaar (string, required)
+        + telephone: 0602938172 (string) - A mobile number if possible.
+        + email: noreply@example.com (string) - We will send a shipment notification with link to status page when an email address is given
+        + reference: Bestelling 112 (string) - Can be used for your own reference. Will be shown on the label.
+        + note: Mag achterom neerleggen (string) - Small note for deliverer. Will not be read prior to delivery!
+        + sender_name: Coolblue (string) - Can be used to ship in the name of a different sender, for example for fulfilment centers. When empty your company name will be used.
+        + delivery_date: 2017-10-15 (date, YYYY-mm-dd) - Can be used to set a delivery date in the future.
+        + pick\_up\_point (object, required)
+            + uuid: `560db083-d941-425b-b3b6-b813718297e1` (string, required) - UUID4 of the pick up point
+        + product: sameday_parcel_medium (string) - Can be any of the existing products. Defaults to *sameday_parcel_standard*.
+        + product_options (array)
+            + (object)
+                + option (string, required) - Can be any of the four product options
+                + value (boolean, required)
+                + max_attempts (number) - Only usable on the *perishable* product option. How many times a delivery attempt should be made before going return to sender.
+
+    + Body
+
+            {
+                "name": "Gijs Boersma",
+                "street": "Lange laan",
+                "house_number": "29",
+                "house_number_extension": "a",
+                "zipcode": "9281EM",
+                "city": "Zevenaar",
+                "telephone": "0602938172",
+                "email": "noreply@example.com",
+                "reference": "Bestelling 112",
+                "pick_up_point": {
+                    "uuid": "560db083-d941-425b-b3b6-b813718297e1"
+                },
+                "product": "sameday_parcel_medium",
+                "product_options": [
+                        {
+                            "option": "allow_neighbours",
+                            "value": false
+                        },
+                        {
+                            "option": "require_signature",
+                            "value": false
+                        },
+                        {
+                            "option": "age_check_18",
+                            "value": false
+                        },
+                        {
+                            "option": "perishable",
+                            "value": true,
+                            "max_attempts": 2
+                        }
+                    ]
+                }
+
++ Response 201 (application/json)
+
+    + Body
+
+            {
+                "data": {
+                    "trackingcode": "R5W2B358S",
+                    "sender_name": "Coolblue",
+                    "company_name": null,
+                    "name": "Gijs Boersma",
+                    "street": "Lange laan",
+                    "house_number": "29",
+                    "house_number_extension": "a",
+                    "zipcode": "9281EM",
+                    "city": "Zevenaar",
+                    "telephone": "0602938172",
+                    "email": "noreply@example.com",
+                    "reference": "Bestelling 112",
+                    "note": "Mag achterom neerleggen",
+                    "tracking_url": "https://portal.redjepakketje.nl/t/R5W2B358S",
+                    "label_pdf_url": "https://api.redjepakketje.nl/api/v1/shipments/R5W2B358S/label.pdf",
+                    "label_png_url": "https://api.redjepakketje.nl/api/v1/shipments/R5W2B358S/label?format=png",
+                    "label_zpl_url": "https://api.redjepakketje.nl/api/v1/shipments/R5W2B358S/label?format=zpl",
+                    "status": "pre_transit",
+                    "expected_delivery_date": "2016-02-29",
+                    "expected_delivery_time_from": "15:00",
+                    "expected_delivery_time_to": "15:30",
+                    "pick_up_point": {
+                        "uuid": "560db083-d941-425b-b3b6-b813718297e1",
+                        "reference": "04925725f0ce61c9",
+                        "name": "Chocoladebruin animi",
+                        "telephone": "+3126 2284479",
+                        "street": "Zhanglaan",
+                        "house_number": "2",
+                        "zipcode": "8722 JR",
+                        "city": "Asten",
+                        "state": null,
+                        "country": "NL",
+                        "available_days": [
+                            2,
+                            6,
+                            7,
+                            4,
+                            3,
+                            5,
+                            1
+                        ],
+                        "cut_off_time": "14:00:00",
+                        "contact": {
+                            "uuid": "0504a55f-4b14-49ac-a0e8-44e3c500ea30",
+                            "reference": "zlCWtf9vtmnlgGUf",
+                            "first_name": "Jente",
+                            "last_name": "van Dijk",
+                            "gender": null,
+                            "telephone": "042 1855709",
+                            "email": "julie.aydin@vandernoot.com"
+                        }
+                    },
+                    "product": "sameday_parcel_standard",
+                    "product_options": [
+                        {
+                            "option": "allow_neighbours",
+                            "value": false
+                        },
+                        {
+                            "option": "perishable",
+                            "value": true,
+                            "max_attempts": 2
+                        }
+                    ],
+                }
+            }
+
+
+### Get single shipment [GET /shipments/{trackingcode}]
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+            
++ Response 200 (application/json)
+
+        {
+            "data": {
+                "trackingcode": "RETT8XSN4",
+                "company_name": null,
+                "name": "Dirk de Vries",
+                "street": "Dorpsstraat",
+                "house_number": "12",
+                "house_number_extension": null,
+                "zipcode": "8231AM",
+                "city": "Arnhem",
+                "telephone": "0699283902",
+                "email": "noreply@redjepakketje.nl",
+                "reference": null,
+                "tracking_url": "https://portal.redjepakketje.nl/t/RETT8XSN4",
+                "label_pdf_url": "https://api.redjepakketje.nl/api/v1/shipments/RETT8XSN4/label.pdf",
+                "label_png_url": "https://api.redjepakketje.nl/api/v1/shipments/RETT8XSN4/label?format=png",
+                "label_zpl_url": "https://api.redjepakketje.nl/api/v1/shipments/RETT8XSN4/label?format=zpl",
+                "status": "delivered",
+                "expected_delivery_date": "2016-02-22",
+                "expected_delivery_time_from": "15:00",
+                "expected_delivery_time_to": "15:30",
+                "pick_up_point": {
+                    "uuid": "560db083-d941-425b-b3b6-b813718297e1",
+                    "reference": "04925725f0ce61c9",
+                    "name": "Chocoladebruin animi",
+                    "telephone": "+3126 2284479",
+                    "street": "Zhanglaan",
+                    "house_number": "2",
+                    "zipcode": "8722 JR",
+                    "city": "Asten",
+                    "state": null,
+                    "country": "NL",
+                    "available_days": [
+                        2,
+                        6,
+                        7,
+                        4,
+                        3,
+                        5,
+                        1
+                    ],
+                    "cut_off_time": "14:00:00",
+                    "contact": {
+                        "uuid": "0504a55f-4b14-49ac-a0e8-44e3c500ea30",
+                        "reference": "zlCWtf9vtmnlgGUf",
+                        "first_name": "Jente",
+                        "last_name": "van Dijk",
+                        "gender": null,
+                        "telephone": "042 1855709",
+                        "email": "julie.aydin@vandernoot.com"
+                    }
+                },
+                "product": "sameday_parcel_medium",
+                "product_options": [
+                    {
+                        "option": "allow_neighbours",
+                        "value": false
+                    }
+                ],
+                "delivery_attempts": [
+                    {
+                        "datetime": "2017-12-01T11:17:39+01:00",
+                        "receiver_address": "Langelaan 31",
+                        "receiver_signature": "https://api.redjepakketje.nl/api/v1/shipments/RETT8XSN4/delivery-attempt/171/signature.png",
+                        "successful": true,
+                        "status_text": "Afgeleverd bij buren",
+                        "status": "BB"
+                    },
+                    {
+                        "datetime": "2017-11-22T08:39:09+01:00",
+                        "receiver_address": null,
+                            "receiver_signature": null,
+                        "successful": false,
+                        "status_text": "Niemand aanwezig",
+                        "status": "NT1"
+                    }
+                ],
+                "events": [
+                    {
+                        "old_status": "out_for_delivery",
+                        "new_status": "delivered",
+                        "datetime": "2017-11-22T09:27:01+01:00"
+                    },
+                    {
+                        "old_status": "pre_transit",
+                        "new_status": "out_for_delivery",
+                        "datetime": "2017-11-22T08:38:02+01:00"
+                    }
+                ]
+            }
+        }
+
+
+
+
+
+## Shipment labels [/shipments/{trackingcode}/label?format={format}&pagesize={pagesize}]
+
++ Parameters
+    + trackingcode (string) - Trackingcode of the shipment you want the label from
+    + format (string) - The format you want (`pdf`, `png` or `zpl`)
+    + pagesize (string) - The page format you want. See table for possible combinations.
+
+### Get a shipment label [GET]
+
+You get the PDF, ZPL or PNG shipment label right away.
+
+|Format|Possible pagesizes|
+|---|---|
+|PDF|A6 _(depricated)_ or A7|
+|PNG|A7|
+|ZPL|None|
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+            
++ Response 200 (application/pdf)
+
+    + Body
+
+            %PDF-1.4
+            1 0 obj
+            <<
+            /Title (þÿ)
+            /Creator (þÿ�w�k�h�t�m�l�t�o�p�d�f� �0�.�1�2�.�3)
+            /Producer (þÿ�Q�t� �4�.�8�.�7)
+            /CreationDate (D:20160227175416Z)
+            >>
+            endobj
+            3 0 obj
+            <<
+            /Type /ExtGState
+            ...
+
+
+
+
+
+## Pick Up Points [/pick-up-points]
+
+
+### List all pick up points [GET]
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+            
++ Response 200 (application/json)
+
+        {
+            "count": 1,
+            "data": [
+                {
+                    "uuid": "a5273946-2512-483e-a91c-4505c400d76c",
+                    "reference": "Your reference",
+                    "name": "Main warehouse",
+                    "telephone": "+31612345678",
+                    "street": "Streetname",
+                    "house_number": "12",
+                    "zipcode": "51025AB",
+                    "city": "Breda",
+                    "state": "Noord-Brabant",
+                    "country": "NL",
+                    "available_days": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ],
+                    "cut_off_time": "14:00:00",
+                    "contact": {
+                        "uuid": "282e81a6-466e-405d-999a-43fcbbe7b5b9",
+                        "reference": null,
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "gender": "m",
+                        "telephone": null,
+                        "email": "noreply@redjepakketje.nl"
+                    }
+                }
+            ]
+        }
+
+
+### Get a single pick up point [GET /pick-up-points/{uuid}]
+
++ Parameters
+
+    + uuid (string) - UUID4 identifier of the pick up point.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+            
++ Response 200 (application/json)
+
+            {
+                "data": {
+                    "uuid": "a5273946-2512-483e-a91c-4505c400d76c",
+                    "reference": "Your reference",
+                    "name": "Main warehouse",
+                    "telephone": "+31612345678",
+                    "street": "Streetname",
+                    "house_number": "12",
+                    "zipcode": "51025AB",
+                    "city": "Breda",
+                    "state": "Noord-Brabant",
+                    "country": "NL",
+                    "available_days": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5
+                    ],
+                    "cut_off_time": "14:00:00",
+                    "contact": {
+                        "uuid": "282e81a6-466e-405d-999a-43fcbbe7b5b9",
+                        "reference": null,
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "gender": "m",
+                        "telephone": null,
+                        "email": "noreply@redjepakketje.nl"
+                    }
+                }
+            }
+
+
+
+
+## Contacts [/contacts]
+
+
+### List all contacts [GET]
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+            
++ Response 200 (application/json)
+
+            {
+                "count": 1,
+                "data": [
+                    {
+                        "uuid": "e14f5209-a917-40d5-b748-2e5a7140d51c",
+                        "reference": "Your reference",
+                        "first_name": "Jane",
+                        "last_name": "Doe",
+                        "gender": "f",
+                        "telephone": "+31612345678",
+                        "email": "jane@example.com"
+                    }
+                ]
+            }
+
+
+### Create a contact [POST]
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+            
+    + Attributes (object)
+
+        + first_name: Jane (string, required)
+        + last_name: Doe (string, required)
+        + telephone: `+31612345678` (string) - A mobile number if possible.
+        + email: `jane@example.com` (string)
+        + gender: f (string) - Gender identifier: f or m.
+        + reference: sasdfx4df2d5d (string) - Can be used for your own reference.
+
+    + Body
+
+            {
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "gender": "f",
+                "telephone": "+31612345678",
+                "email": "jane@example.com",
+                "reference": "sasdfx4df2d5d"
+            }
+
++ Response 201 (application/json)
+
+    + Body
+
+            {
+                "data": {
+                    "uuid": "e14f5209-a917-40d5-b748-2e5a7140d51c",
+                    "first_name": "Jane",
+                    "last_name": "Doe",
+                    "gender": "f",
+                    "telephone": "+31612345678",
+                    "email": "jane@example.com",
+                    "reference": "sasdfx4df2d5d"
+                }
+            }
+
+
+### Get a single contact [GET /contacts/{uuid}]
+
++ Parameters
+    + uuid (string) - UUID4 identifier of the contact.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+            
++ Response 200 (application/json)
+
+        {
+            "data": {
+                "uuid": "e14f5209-a917-40d5-b748-2e5a7140d51c",
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "gender": "f",
+                "telephone": "+31612345678",
+                "email": "jane@example.com",
+                "reference": "sasdfx4df2d5d"
+            }
+        }
+
+
+### Update a contact [POST /contacts/{uuid}]
+
++ Parameters
+    + uuid (string) - UUID4 identifier of the contact.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+
+    + Attributes (object)
+
+        + first_name: John (string)
+        + last_name: Doe (string)
+        + telephone: `+31612345678` (string) - A mobile number if possible.
+        + email: `jane@example.com` (string)
+        + gender: f (string) - Gender identifier: f or m.
+        + reference: sasdfx4df2d5d (string) - Can be used for your own reference.
+
+    + Body
+
+            {
+                "first_name": "John",
+                "gender": "m",
+                "email": "john@example.com"
+            }
+
++ Response 200 (application/json)
+
+        {
+            "data": {
+                "uuid": "e14f5209-a917-40d5-b748-2e5a7140d51c",
+                "first_name": "John",
+                "last_name": "Doe",
+                "gender": "m",
+                "telephone": "+31612345678",
+                "email": "john@example.com",
+                "reference": "sasdfx4df2d5d"
+            }
+        }
+
+
+
+
+## Cut off times [/cut-off-times]
+
+### Request cut off time [POST]
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+
+    + Attributes (object)
+
+        + zipcode: `1234 AB` (string, required)
+
+    + Body
+
+            {
+                "zipcode": "1102 AB"
+            }
+
++ Response 200 (application/json)
+
+        {
+            "data": {
+                "zipcode": "1102 AB",
+                "cut_off_time": "14:00:00"
+            }
+        }
+
+
+
+# Group Webhooks
+
+**Webhooks can be configured upon request.** Multiple type of events can be sent to you via a single endpoint. Be aware that a single request can contain multiple events which each can differ from type.
+
+HTTP Basic Auth for authorization on your endpoint is supported, although not required, it is highly recommended.
+Therefore a username and password can be requested by our support team upon setup.
+
+Current events types:  `pick_up_point.cut_off_time.updated`, `shipment.status.updated`, `shipment.expected_delivery_time.created`
+_We'll try to keep these event types as clear as possible._
+
+Next to the event type, a timestamp and an array with details to update your entity will be send in the body.
+
+The data will be sent as JSON.
+
+### Example body
+```
+{
+    "count": 1,
+    "data": [
+        {
+            "event": "shipment.status.updated",
+            "timestamp": "1486369019",
+            "details": {
+                "trackingcode":"ABC123456",
+                "status": "pre_transit"
+            }
+        }
+    ]
+}
+```
+
+```
+{
+    "count": 1,
+    "data": [
+        {
+            "event": "pick_up_point.cut_off_time.updated",
+            "timestamp": "1486369019",
+            "details": {
+                "uuid":"560db083-d941-425b-b3b6-b813718297e1",
+                "cut_off_time": "13:00"
+            }
+        }
+    ]
+}
+```
+
+```
+{
+    "count": 1,
+    "data": [
+        {
+            "event": "shipment.expected_delivery_time.created",
+            "timestamp": "1486369019",
+            "details": {
+                "trackingcode":"ABC123456",
+                "expected_delivery_date": "2018-02-27",
+                "expected_delivery_time_from":"21:30",
+                "expected_delivery_time_to": "22:00"
+            }
+        }
+    ]
+}
+```
+
+# Group FAQ
+
+#### How do I test my API calls?
+Both the sandbox and production have the same endpoint: https://api.redjepakketje.nl/api/v1 Depending on the API key you use a test or a real shipment is created. So when switching from development to production the only thing you need to do is change the API key and Pick-up point UUID (if provided). Please do not test with the production API key: Shipments will be picked up if created with a production API key.
+
+#### HTTP error 401 "Unauthorized"
+This happens when the Authentication is incorrect. You should send a Authorization header with Basic Auth. A basic auth string is composed of the string "Basic" followed by a space and the base64 encode of your API key and a Colon.
+E.G. if your API key is `6ALRQR4nAA2fLEf74qEtYFKr7aXcbkqi` then the Authorization header is `Authorization: Basic NkFMUlFSNG5BQTJmTEVmNzRxRXRZRktyN2FYY2JrcWk6`. This is the base64 encode of `NkFMUlFSNG5BQTJmTEVmNzRxRXRZRktyN2FYY2JrcWk6:`
+
+
+#### Error: "The selected pick up point.uuid is invalid."
+If you provide a pick-up point uuid make sure it is right. You can retreive your pick-up point UUID's with the `List All pick-up points` API call or by contacting RJP. Please keep in mind that the pick-up points are unique for each environment. Meaning that the UUID for the sandbox environment **won't work** for production!
+
+# Group Changelog
+
+#### 2019-01-22
+ - New Shipment status: `ready_for_pickup`
+
+#### 2018-12-19
+ - Pagination is required for the List Shipments request. Requests without pagination will default to shipments from the last week.
+ - The maximum for pagination is now set at 1000 items per page.
+
+#### 2018-06-13
+ - TLS version 1.2 or higher is required. TLS 1.0 and 1.1 are no longer deemed secure enough.
