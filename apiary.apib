@@ -232,42 +232,7 @@ Get a paginated list of shipments.
                             "successful": false,
                             "status_text": "Niemand aanwezig",
                             "status": "NT1"
-                        }
-                    ],
-                    "events": [
-                        {
-                            "old_status": "out_for_delivery",
-                            "new_status": "delivered",
-                            "datetime": "2017-11-22T09:27:01+01:00"
-                        },
-                        {
-                            "old_status": "pre_transit",
-                            "new_status": "out_for_delivery",
-                            "datetime": "2017-11-22T08:38:02+01:00"
-                        }
-                    ]
-                }
-            ]
-        }
-
-
-### Create a new shipment [POST]
-
-After a shipment is created, it will be created as a 'pre\_transit' shipment. It will move to 'in\_transit' as soon as the shipment is in our possession.
-
-Trackingpage and label are directly available after shipment creation.
-
-The expected date of delivery is based on the cut off time for the given pick up point.
-
-Only product options that differ from the defaults are returned.
-
-+ Request (application/json)
-    + Headers
-    
-            Authorization: Basic QUJDMTIzOg==
-
-    + Attributes (object)
-        + company_name: Boeren BV (string)
+                        }Return Shipm (string)
         + name: Gijs Boersma (string, required)
         + street: Lange laan (string, required)
         + house_number: 29 (number, required)
@@ -707,6 +672,42 @@ You get the PDF, ZPL or PNG shipment label right away.
 
 
 ## Return Shipments [/return-shipments]
+
+######The possible Return shipment status values are:
+
+ - pre_transit
+ - waiting_for_pickup
+ - in_transit
+ - in_depot
+ - in_transit_depot
+ - out_for_delivery
+ - delivered
+ - failed_to_pick_up
+ - failed_to_delivery
+ - not_available
+ - cancelled
+ - cancelled_failed_pickup
+ 
+> Note: Additional status values can be added in the future.
+ 
+######The possible Return attempt status values are:
+|Value|Successfull|Meaning|
+|---|---|---|
+|OK|true|Delivered at Pick-up Point|
+|PU|false|Picked-up at customer|
+|NT|false|Not at home|
+|BDG|false|Company closed on pick-up|
+|FTA|false|Address invalid|
+|NP|false|Not picked-up, see note|
+|TN|false|Time shortage|
+|SF|false|Sorting mistake|
+|LST|false|Shipment is lost|
+
+ 
+######Current possible return shipment products:
+ - sameday_parcel_standard
+ - sameday_parcel_medium
+ - sameday_parcel_large
 
 ### List all return-shipments [GET /return-shipments?per_page={per_page}&page={page}&pickup_before={pickup_before}&pickup_after={pickup_after}&delivery_before={delivery_before}&delivery_after={delivery_after}]
 
