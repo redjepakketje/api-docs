@@ -630,22 +630,27 @@ Create a new shipment and return the label in the response (Base64 encoded)
 
 
 
-## Shipment labels [/shipments/{trackingcode}/label?format={format}&pagesize={pagesize}]
+## Shipment labels [/shipments/{trackingcode}/label?format={format}&pagesize={pagesize}&offset_x={offset_x}&offset_y={offset_y}&dpi={dpi}&embedded={embedded}&inverted={inverted}]
 
 + Parameters
     + trackingcode (string) - Trackingcode of the shipment you want the label from
     + format (string) - The format you want (`pdf`, `png` or `zpl`)
     + pagesize (string) - The page format you want. See table for possible combinations.
+    + offset_x (integer, optional) - Only for ZPL: X-offset that is applied to all coordinates
+    + offset_y (integer, optional) - Only for ZPL: Y-offset that is applied to all coordinates
+    + dpi (integer, optional) - Only for ZPL: DPI to be printed at.
+    + embedded (boolean, optional) - Only for ZPL: If true a partial ZPL will be returned
+    + inverted (boolean, optional) - Only for ZPL: Rotates the label 180 degrees if set to true
 
 ### Get a shipment label [GET]
 
 You get the PDF, ZPL or PNG shipment label right away.
 
-|Format|Possible pagesizes|
-|---|---|
-|PDF|A6 _(depricated)_ or A7|
-|PNG|A7|
-|ZPL|None|
+|Format|Possible pagesizes|Offset possible|DPI possible|Embedded possible|Rotation possible|
+|---|---|---|---|---|---|
+|pdf|a6 OR a7|No|No|No|No|
+|png|a6 _(deprecated)_ OR a7|No|No|No|No|
+|zpl|a6 OR a7|Yes|200 OR 300|Yes|Yes|
 
 + Request (application/json)
     + Headers
