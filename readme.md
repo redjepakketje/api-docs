@@ -1,4 +1,4 @@
-# RedJePakketj API Docs
+# Red je Pakketje API Docs
 
 View the documentation online: https://redjepakketje.docs.apiary.io/
 
