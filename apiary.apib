@@ -627,6 +627,82 @@ Create a new shipment and return the label in the response (Base64 encoded)
         }
 
 
+### Cancel single shipment [POST /shipments/{trackingcode}/cancel]
+
+> **Note:** You can only cancel shipments that are in the PRE_TRANSIT state. For any other state please contact the Red je Pakketje service desk.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+
+            
++ Response 200 (application/json)
+
+        {
+            "data": {
+                "trackingcode": "RETT8XSN4",
+                "company_name": null,
+                "name": "Dirk de Vries",
+                "street": "Dorpsstraat",
+                "house_number": "12",
+                "house_number_extension": null,
+                "zipcode": "8231AM",
+                "city": "Arnhem",
+                "telephone": "0699283902",
+                "email": "noreply@redjepakketje.nl",
+                "reference": null,
+                "tracking_url": "https://portal.redjepakketje.nl/t/RETT8XSN4",
+                "label_pdf_url": "https://api.redjepakketje.nl/api/v1/shipments/RETT8XSN4/label.pdf",
+                "label_png_url": "https://api.redjepakketje.nl/api/v1/shipments/RETT8XSN4/label?format=png",
+                "label_zpl_url": "https://api.redjepakketje.nl/api/v1/shipments/RETT8XSN4/label?format=zpl",
+                "status": "cancelled",
+                "expected_delivery_date": "2016-02-22",
+                "expected_delivery_time_from": "15:00",
+                "expected_delivery_time_to": "15:30",
+                "pick_up_point": {
+                    "uuid": "560db083-d941-425b-b3b6-b813718297e1",
+                    "reference": "04925725f0ce61c9",
+                    "name": "Chocoladebruin animi",
+                    "telephone": "+3126 2284479",
+                    "street": "Zhanglaan",
+                    "house_number": "2",
+                    "zipcode": "8722 JR",
+                    "city": "Asten",
+                    "state": null,
+                    "country": "NL",
+                    "available_days": [
+                        2,
+                        6,
+                        7,
+                        4,
+                        3,
+                        5,
+                        1
+                    ],
+                    "cut_off_time": "14:00:00",
+                    "contact": {
+                        "uuid": "0504a55f-4b14-49ac-a0e8-44e3c500ea30",
+                        "reference": "zlCWtf9vtmnlgGUf",
+                        "first_name": "Jente",
+                        "last_name": "van Dijk",
+                        "gender": null,
+                        "telephone": "042 1855709",
+                        "email": "julie.aydin@vandernoot.com"
+                    }
+                },
+                "product": "sameday_parcel_medium",
+                "product_options": [
+                    {
+                        "option": "allow_neighbours",
+                        "value": false
+                    }
+                ],
+                "delivery_attempts": [],
+            }
+        }
+
+
 
 
 
@@ -1066,6 +1142,76 @@ Shipments created before 14:00 will be picked up the same day. The delivery day 
                     ],
                 }
             }
+
+
+### Cancel single return shipment [POST /return-shipments/{UUID}/cancel]
+
+> **Note:** You can only cancel return shipments that are in the PRE_TRANSIT state. For any other state please contact the Red je Pakketje service desk.
+
++ Request (application/json)
+    + Headers
+    
+            Authorization: Basic QUJDMTIzOg==
+
+            
+
+
++ Response 200 (application/json)
+
+        {
+            "data": {
+                "UUID": "8b85b881-a14d-4118-991b-2f0b2380ef31",
+                "trackingcode": "TADE3SWR6",
+                "company_name": null,
+                "name": "Dirk de Vries",
+                "street": "Dorpsstraat",
+                "house_number": "12",
+                "house_number_extension": null,
+                "zipcode": "8231AM",
+                "city": "Arnhem",
+                "telephone": "0699283902",
+                "email": "noreply@redjepakketje.nl",
+                "reference": null,
+                "tracking_url": "https://portal.redjepakketje.nl/t/TADE3SWR6/8231AM",
+                "status": "cancelled",
+                "expected_delivery_date": "2016-02-22",
+                "expected_delivery_time_from": "15:00",
+                "expected_delivery_time_to": "15:30",
+                "pick_up_point": {
+                    "uuid": "560db083-d941-425b-b3b6-b813718297e1",
+                    "reference": "04925725f0ce61c9",
+                    "name": "Chocoladebruin animi",
+                    "telephone": "+3126 2284479",
+                    "street": "Zhanglaan",
+                    "house_number": "2",
+                    "zipcode": "8722 JR",
+                    "city": "Asten",
+                    "state": null,
+                    "country": "NL",
+                    "available_days": [
+                        2,
+                        6,
+                        7,
+                        4,
+                        3,
+                        5,
+                        1
+                    ],
+                    "cut_off_time": "14:00:00",
+                    "contact": {
+                        "uuid": "0504a55f-4b14-49ac-a0e8-44e3c500ea30",
+                        "reference": "zlCWtf9vtmnlgGUf",
+                        "first_name": "Jente",
+                        "last_name": "van Dijk",
+                        "gender": null,
+                        "telephone": "042 1855709",
+                        "email": "julie.aydin@vandernoot.com"
+                    }
+                },
+                "product": "sameday_parcel_medium",
+                "return_attempts": [],
+            }
+        }
 
 
 
