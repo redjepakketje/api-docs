@@ -1490,7 +1490,7 @@ Shipments created before 14:00 will be picked up the same day. The delivery day 
 HTTP Basic Auth for authorization on your endpoint is supported, although not required, it is highly recommended.
 Therefore a username and password can be requested by our support team upon setup.
 
-Current events types for shipments:  `pick_up_point.cut_off_time.updated`, `shipment.status.updated`, `shipment.expected_delivery_time.created`
+Current events types for shipments:  `shipment.status.updated`, `shipment.expected_delivery_time.created`
 
 Current events types for returns:  `return_shipment.trackingcode.updated`,  `return_shipment.status.updated`, `return_shipment.expected_pickup_time.created`
 
@@ -1529,22 +1529,6 @@ The data will be sent as JSON.
             "details": {
                 "trackingcode":"ABC123456",
                 "status": "pre_transit"
-            }
-        }
-    ]
-}
-```
-
-```
-{
-    "count": 1,
-    "data": [
-        {
-            "event": "pick_up_point.cut_off_time.updated",
-            "timestamp": "1486369019",
-            "details": {
-                "uuid":"560db083-d941-425b-b3b6-b813718297e1",
-                "cut_off_time": "13:00"
             }
         }
     ]
